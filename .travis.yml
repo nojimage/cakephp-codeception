@@ -14,6 +14,8 @@ env:
   global:
     - REINSTALL_CAKEPHP=0
     - DEFAULT=1
+    - DB=mysql
+    - db_dsn='mysql://travis:travis@0.0.0.0/cakephp_test'
 
 cache:
   directories:
@@ -49,11 +51,14 @@ install:
   - if [ $DEFAULT = '1' ]; then composer run-script --no-interaction post-install-cmd; fi
   - if [ $DEFAULT = '1' ]; then cd ../sample_app; fi
   - if [ $DEFAULT = '1' ]; then cp -rv ../test_app/src ./ && cp -r ../test_app/config ./ && cp -r ../test_app/webroot ./; fi
+  - if [ $CAKE_VERSION = '3.1.*' ]; then mv config/app-3.1.php config/app.php ; fi
   - if [ $DEFAULT = '1' ]; then cp ../test_app/src/Console/Installer.php src/Console/.; fi
   - if [ $DEFAULT = '1' ]; then cp ../test_app/composer.json .; fi
   - if [ $DEFAULT = '1' ]; then composer install --no-interaction; fi
 
 before_script:
+  - if [ $DB = 'mysql' ]; then mysql -u root -e 'CREATE DATABASE cakephp_test;'; fi
+  - if [ $DB = 'mysql' ]; then echo "USE mysql;\nUPDATE user SET password=PASSWORD('travis') WHERE user='travis';\nFLUSH PRIVILEGES;\n" | mysql -u root; fi
   - if [ $PHPCS = '1' ]; then composer require --dev squizlabs/php_codesniffer; fi
   - if [ $DEFAULT = '1' ]; then cd $TRAVIS_BUILD_DIR/tests/test_app; fi
   - if [ $DEFAULT = '1' ]; then vendor/bin/codecept bootstrap; fi
