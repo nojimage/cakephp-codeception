@@ -178,14 +178,56 @@ $I->dontSeeRecord('users', ['email' => 'jadb@cakephp.org']);
 
 ### Miscellaneous
 
-#### Load fixtures with `loadFixtures($fixtures[, $fixture2, ...])`
+#### Load fixtures
 
-All the below forms are equivalent:
+In your `Cest` test case, write `$fixutures` property:
 
 ```php
-$I->loadFixtures('app.posts', 'app.tags');
-$I->loadFixtures(['app.posts', 'app.tags']);
-$I->fixtures = ['app.posts', 'app.tags'];
+class AwesomeCest
+{
+    public $fixtures = [
+        'app.users',
+        'app.posts',
+    ];
+
+    // ...
+}
+```
+
+You can use `$autoFixtures`, `$dropTables` property, and `loadFixtures()` method:
+
+```php
+class AwesomeCest
+{
+    public $autoFixtures = false;
+    public $dropTables = false;
+    public $fixtures = [
+        'app.users',
+        'app.posts',
+    ];
+
+    public function tryYourSenario($I)
+    {
+        // load fixtures manually
+        $I->loadFixtures('Users', 'Posts');
+        // or load all fixtures
+        $I->loadFixtures();
+        // ...
+    }
+}
+```
+
+In your `Cept` test case, use `$I->useFixtures()` and `$I->loadFixtures()`:
+
+```php
+$I = new FunctionalTester($scenario);
+
+// You should call `useFixtures` before `loadFixtures`
+$I->useFixtures('app.users', 'app.posts');
+// Then load fixtures manually
+$I->loadFixtures('Users', 'Posts');
+// or load all fixtures
+$I->loadFixtures();
 ```
 
 #### Assert CakePHP version with `expectedCakePHPVersion($ver, $operator = 'ge')`
